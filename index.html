@@ -32,24 +32,37 @@
 
     function create ()
     {
-        this.add.image(400, 300, 'roffles');
-        //this.add.image(400, 300, 'chowder');
+        this.add.image(1000, 1000, 'roffles');
 
-        var particles = this.add.particles('red');
+        var particles = this.add.particles('purple');
 
         var emitter = particles.createEmitter({
-            speed: 100,
-            scale: { start: 1, end: 0 },
+            speed: 1,
+            scale: { start: 1, end: 1 },
             blendMode: 'ADD'
         });
 
-        var logo = this.physics.add.image(400, 100, 'chowder');
+
+        var emitter2 = particles.createEmitter({
+            speed: 20,
+            scale: { start: 1, end: 4 },
+            blendMode: 'ADD'
+        });
+
+        var logo = this.physics.add.image(400, 300, 'chowder');
+        var logo2 = this.physics.add.image(400, 100, 'roffles');
 
         logo.setVelocity(100, 200);
         logo.setBounce(1, 1);
         logo.setCollideWorldBounds(true);
 
+        logo2.setVelocity(400, 400);
+        logo2.setBounce(1, 1);
+        logo2.setCollideWorldBounds(true);
+
         emitter.startFollow(logo);
+        emitter2.startFollow(logo2);
+
     }
     </script>
 
