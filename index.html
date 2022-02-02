@@ -1,71 +1,85 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
 </head>
+
 <body>
 
     <script>
-    var config = {
-        type: Phaser.AUTO,
-        width: 1000,
-        height: 1000,
-        physics: {
-            default: 'arcade',
-            arcade: {
-                gravity: { y: 200 }
+        var char;
+        var move_speed = 250
+        var knives = new Set()
+        var knife_count = 10
+
+        var config = {
+            type: Phaser.AUTO,
+            width: 1000,
+            height: 1000,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 }
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
             }
-        },
-        scene: {
-            preload: preload,
-            create: create
+        };
+
+        var game = new Phaser.Game(config);
+
+        function preload() {
+            this.load.image('knife', 'assets/knife.png');
+            this.load.image('chowder', 'assets/chowder.png');
         }
-    };
 
-    var game = new Phaser.Game(config);
+        function spawnKnives() {
+            for (let i =0; i <= knife_count; i++) {
+                knife = this.physics.add.image(char.x, char.y, 'knife');
+                knife.setScale(.1)
+                knife.setVelocityX(Math.random() * move_speed)
+                knife.setVelocityY(Math.random() * move_speed)
+                knives.add(knife)
+            }
+        }
 
-    function preload ()
-    {
-        this.load.image('roffles', 'assets/roffles2.png');
-        this.load.image('chowder', 'assets/chowder.png');
-    }
+        function create() {
+            char = this.physics.add.image(400, 300, 'chowder');
+            char.setCollideWorldBounds(true);
+            keys = this.input.keyboard.addKeys("W,A,S,D");
+            
+            this.time.addEvent({
+                delay: 1000,             
+                callback: spawnKnives,
+                callbackScope: this,
+                loop: true
+            });
 
-    function create ()
-    {
-        this.add.image(1000, 1000, 'roffles');
+        }
 
-        var particles = this.add.particles('purple');
+        function update() {
+            if (keys.A.isDown) {
+                char.setVelocityX(-move_speed)
+            } else if (keys.D.isDown) {
+                char.setVelocityX(move_speed)
+            } else {
+                char.setVelocityX(0) 
+            }
 
-        var emitter = particles.createEmitter({
-            speed: 1,
-            scale: { start: 1, end: 1 },
-            blendMode: 'ADD'
-        });
-
-
-        var emitter2 = particles.createEmitter({
-            speed: 20,
-            scale: { start: 1, end: 4 },
-            blendMode: 'ADD'
-        });
-
-        var logo = this.physics.add.image(400, 300, 'chowder');
-        var logo2 = this.physics.add.image(400, 100, 'roffles');
-
-        logo.setVelocity(100, 200);
-        logo.setBounce(1, 1);
-        logo.setCollideWorldBounds(true);
-
-        logo2.setVelocity(400, 400);
-
-        logo2.setBounce(1, 1);
-        logo2.setCollideWorldBounds(true);
-
-        emitter.startFollow(logo);
-        emitter2.startFollow(logo2);
-
-    }
+            if (keys.W.isDown) {
+                char.setVelocityY(-move_speed) 
+            } else if (keys.S.isDown) {
+                char.setVelocityY(move_speed) 
+            } else {
+                char.setVelocityY(0) 
+            }
+        }
     </script>
 
 </body>
+
 </html>
