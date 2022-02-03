@@ -9,8 +9,9 @@
 
     <script>
         var char;
-        var move_speed = 250
-        var knives = new Set()
+        MOVE_SPEED = 250
+        KNIFE_SPEED = 500
+        knives = []
         var knife_count = 10
 
         var config = {
@@ -37,45 +38,57 @@
             this.load.image('chowder', 'assets/chowder.png');
         }
 
-        function spawnKnives() {
-            for (let i =0; i <= knife_count; i++) {
-                knife = this.physics.add.image(char.x, char.y, 'knife');
-                knife.setScale(.1)
-                knife.setVelocityX(Math.random() * move_speed)
-                knife.setVelocityY(Math.random() * move_speed)
-                knives.add(knife)
-            }
-        }
-
         function create() {
             char = this.physics.add.image(400, 300, 'chowder');
             char.setCollideWorldBounds(true);
             keys = this.input.keyboard.addKeys("W,A,S,D");
-            
+
+            // Knife spawn timer
             this.time.addEvent({
-                delay: 1000,             
-                callback: spawnKnives,
+                delay: 300,
+                callback: function() {
+                    knife = this.physics.add.image(char.x, char.y, 'knife')
+                    knife.setScale(.1)
+                    knife.setVelocityX(knifeSpeedX)
+                    knife.setVelocityY(knifeSpeedY)
+                    knife.rotation = (knifeSpeedX > 0 ? 90 : 0) + (knifeSpeedY > 0 ? 90 : 0)
+
+                    knives.push(knife)
+                    if (knives.length > 5)
+                        knives.shift().destroy()
+                },
                 callbackScope: this,
-                loop: true
+                loop: true,
             });
 
+            // Set initial knife speed
+            knifeSpeedX = KNIFE_SPEED
+            knifeSpeedY = 0
         }
 
         function update() {
             if (keys.A.isDown) {
-                char.setVelocityX(-move_speed)
+                char.setVelocityX(-MOVE_SPEED)
+                knifeSpeedX = -KNIFE_SPEED
             } else if (keys.D.isDown) {
-                char.setVelocityX(move_speed)
+                knifeSpeedX = KNIFE_SPEED
+                char.setVelocityX(MOVE_SPEED)
             } else {
-                char.setVelocityX(0) 
+                char.setVelocityX(0)
+                if (keys.W.isDown || keys.S.isDown)
+                    knifeSpeedX = 0
             }
 
             if (keys.W.isDown) {
-                char.setVelocityY(-move_speed) 
+                knifeSpeedY = -KNIFE_SPEED
+                char.setVelocityY(-MOVE_SPEED)
             } else if (keys.S.isDown) {
-                char.setVelocityY(move_speed) 
+                knifeSpeedY = KNIFE_SPEED
+                char.setVelocityY(MOVE_SPEED)
             } else {
-                char.setVelocityY(0) 
+                char.setVelocityY(0)
+                if (keys.A.isDown || keys.D.isDown)
+                    knifeSpeedY = 0
             }
         }
     </script>
