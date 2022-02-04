@@ -89,7 +89,7 @@
                     ball.setScale(.05)
 
                     balls.push(ball)
-                    if (balls.length > 50) balls.shift().destroy()
+                    if (balls.length > 15) balls.shift().destroy()
                 },
                 callbackScope: this,
                 loop: true,
@@ -132,6 +132,7 @@
             }
 
             // Ball collision detection
+            
             for (let i = 0; i < balls.length; i++) { 
                 balls[i].setVelocityX(balls[i].x < char.x ? BALL_SPEED : -BALL_SPEED)
                 balls[i].setVelocityY(balls[i].y < char.y ? BALL_SPEED : -BALL_SPEED)
