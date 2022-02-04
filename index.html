@@ -8,65 +8,105 @@
 <body>
 
     <script>
-        var char;
-        MOVE_SPEED = 250
-        KNIFE_SPEED = 500
-        knives = []
-        var knife_count = 10
-
-        var config = {
+        WIDTH = 2000
+        HEIGHT = 2000
+        var game = new Phaser.Game({
             type: Phaser.AUTO,
-            width: 1000,
-            height: 1000,
+            backgroundColor: '#FFFFFF',
             physics: {
                 default: 'arcade',
-                arcade: {
-                    gravity: { y: 0 }
-                }
             },
             scene: {
                 preload: preload,
                 create: create,
                 update: update
+            },
+            scale: {
+                width: WIDTH,
+                height: HEIGHT
             }
+        });
+
+        const GameState = {
+            SETUP: 'SETUP',
+            RUNNING: 'RUNNING',
+            DONE: 'DONE',
         };
 
-        var game = new Phaser.Game(config);
+
+        var char;
+        MOVE_SPEED = 250
+        KNIFE_SPEED = 500
+        BALL_SPEED = 50
+        var knives = []
+        var balls = []
+        var knife_count = 10
+        var score = 0
+        gameState = GameState.SETUP;
 
         function preload() {
             this.load.image('knife', 'assets/knife.png');
             this.load.image('chowder', 'assets/chowder.png');
+            this.load.image('fire', 'assets/fire.png');
         }
 
         function create() {
+            // Setup scoreboard
+            scoreText = this.add.text(20, 0, 'SCORE: 0', { fontSize: '32px', fill: '#000' });
+
+            // Setup char
             char = this.physics.add.image(400, 300, 'chowder');
             char.setCollideWorldBounds(true);
             keys = this.input.keyboard.addKeys("W,A,S,D");
 
-            // Knife spawn timer
+            // Setup knives
             this.time.addEvent({
                 delay: 300,
-                callback: function() {
+                callback: function () {
                     knife = this.physics.add.image(char.x, char.y, 'knife')
                     knife.setScale(.1)
                     knife.setVelocityX(knifeSpeedX)
                     knife.setVelocityY(knifeSpeedY)
-                    knife.rotation = (knifeSpeedX > 0 ? 90 : 0) + (knifeSpeedY > 0 ? 90 : 0)
 
                     knives.push(knife)
-                    if (knives.length > 5)
-                        knives.shift().destroy()
+                    if (knives.length > 5) knives.shift().destroy()
+                },
+                callbackScope: this,
+                loop: true,
+            });
+            // Set initial knife speed
+            knifeSpeedX = KNIFE_SPEED
+            knifeSpeedY = 0
+
+            // Setup fireballs
+            this.time.addEvent({
+                delay: 1000,
+                callback: function () {
+                    dist = 200
+                    spawnX = char.x + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
+                    spawnY =  char.y + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
+                    ball = this.physics.add.image(spawnX, spawnY, 'fire')
+                    ball.setScale(.05)
+
+                    balls.push(ball)
+                    if (balls.length > 50) balls.shift().destroy()
                 },
                 callbackScope: this,
                 loop: true,
             });
 
-            // Set initial knife speed
-            knifeSpeedX = KNIFE_SPEED
-            knifeSpeedY = 0
+            gameState = GameState.RUNNING;
         }
 
         function update() {
+            if (gameState == GameState.DONE) {
+                // destory everything and return
+                knives.forEach(i => i.destroy())
+                balls.forEach(i => i.destroy())
+                char.destroy()
+                return
+            }
+
             if (keys.A.isDown) {
                 char.setVelocityX(-MOVE_SPEED)
                 knifeSpeedX = -KNIFE_SPEED
@@ -89,6 +129,25 @@
                 char.setVelocityY(0)
                 if (keys.A.isDown || keys.D.isDown)
                     knifeSpeedY = 0
+            }
+
+            // Ball collision detection
+            for (let i = 0; i < balls.length; i++) { 
+                balls[i].setVelocityX(balls[i].x < char.x ? BALL_SPEED : -BALL_SPEED)
+                balls[i].setVelocityY(balls[i].y < char.y ? BALL_SPEED : -BALL_SPEED)
+
+                this.physics.add.overlap(balls[i], char, function () {
+                    char.destroy()
+                    gameState = GameState.DONE
+                }, null, this);
+
+                for (knife of knives) {
+                    this.physics.add.overlap(balls[i], knife, function () {
+                        balls[i].disableBody(true, true);
+                        score += 1
+                        scoreText.setText("SCORE: " + score)
+                    }, null, this);
+                }
             }
         }
     </script>
