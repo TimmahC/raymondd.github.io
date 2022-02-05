@@ -59,7 +59,7 @@
             // Setup char
             char = this.physics.add.image(400, 300, 'chowder');
             char.setCollideWorldBounds(true);
-            keys = this.input.keyboard.addKeys("W,A,S,D");
+            keys = this.input.keyboard.addKeys("W,A,S,D,R");
 
             // Setup knives
             this.time.addEvent({
@@ -86,16 +86,16 @@
 
             // Setup fireballs
             this.time.addEvent({
-                delay: 600,
+                delay: 400,
                 callback: function () {
                     dist = 200
                     spawnX = char.x + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
                     spawnY = char.y + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
 
-                    isKelley = Math.random() < 0.5
+                    isKelley = Math.random() < 0.9
 
                     ball = this.physics.add.image(spawnX, spawnY, isKelley ? 'kelley' : 'roffles')
-                    ball.setScale(isKelley ? .5 : .8)
+                    ball.setScale(isKelley ? .5 : 2)
 
                     balls.add(ball)
 
@@ -115,11 +115,12 @@
         }
 
         function update() {
+            if (keys.R.isDown) {
+               // implement reset i guess? 
+            }
+
             if (gameState == GameState.DONE) {
-                // destory everything and return
-                knives.forEach(i => i.destroy())
-                balls.forEach(i => i.destroy())
-                char.destroy()
+                cleanup()
                 return
             }
 
@@ -168,6 +169,12 @@
             cleanup.add(ball)
             score += 1
             scoreText.setText("SCORE: " + score)
+        }
+
+        function cleanup() {
+            knives.forEach(i => i.destroy())
+            balls.forEach(i => i.destroy())
+            char.destroy()
         }
     </script>
 
