@@ -12,7 +12,7 @@
         HEIGHT = 2000
         var game = new Phaser.Game({
             type: Phaser.AUTO,
-            backgroundColor: '#FFFFFF',
+            backgroundColor: '#196F3D',
             physics: {
                 default: 'arcade',
             },
@@ -39,7 +39,8 @@
         KNIFE_SPEED = 500
         BALL_SPEED = 50
         var knives = []
-        var balls = []
+        var balls = new Set()
+        var cleanup = new Set()
         var knife_count = 10
         var score = 0
         gameState = GameState.SETUP;
@@ -47,12 +48,12 @@
         function preload() {
             this.load.image('knife', 'assets/knife.png');
             this.load.image('chowder', 'assets/chowder.png');
-            this.load.image('fire', 'assets/fire.png');
+            this.load.image('fire', 'assets/kelley.png');
         }
 
         function create() {
             // Setup scoreboard
-            scoreText = this.add.text(20, 0, 'SCORE: 0', { fontSize: '32px', fill: '#000' });
+            scoreText = this.add.text(20, 0, 'SCORE: 0', { fontSize: '32px', fill: '#FFF' });
 
             // Setup char
             char = this.physics.add.image(400, 300, 'chowder');
@@ -70,6 +71,10 @@
 
                     knives.push(knife)
                     if (knives.length > 5) knives.shift().destroy()
+
+
+                    for (ball of balls)
+                        this.physics.add.overlap(ball, knife, knifeHitsBall, null, this);
                 },
                 callbackScope: this,
                 loop: true,
@@ -84,12 +89,19 @@
                 callback: function () {
                     dist = 200
                     spawnX = char.x + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
-                    spawnY =  char.y + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
+                    spawnY = char.y + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
                     ball = this.physics.add.image(spawnX, spawnY, 'fire')
-                    ball.setScale(.05)
+                    ball.setScale(.5)
 
-                    balls.push(ball)
-                    if (balls.length > 15) balls.shift().destroy()
+                    balls.add(ball)
+
+                    for (knife of knives)
+                        this.physics.add.overlap(ball, knife, knifeHitsBall, null, this);
+
+                    this.physics.add.overlap(ball, char, function () {
+                        char.destroy()
+                        gameState = GameState.DONE
+                    }, null, this);
                 },
                 callbackScope: this,
                 loop: true,
@@ -132,24 +144,21 @@
             }
 
             // Ball collision detection
-            
-            for (let i = 0; i < balls.length; i++) { 
-                balls[i].setVelocityX(balls[i].x < char.x ? BALL_SPEED : -BALL_SPEED)
-                balls[i].setVelocityY(balls[i].y < char.y ? BALL_SPEED : -BALL_SPEED)
-
-                this.physics.add.overlap(balls[i], char, function () {
-                    char.destroy()
-                    gameState = GameState.DONE
-                }, null, this);
-
-                for (knife of knives) {
-                    this.physics.add.overlap(balls[i], knife, function () {
-                        balls[i].disableBody(true, true);
-                        score += 1
-                        scoreText.setText("SCORE: " + score)
-                    }, null, this);
-                }
+            for (ball of balls) {
+                ball.setVelocityX(ball.x < char.x ? BALL_SPEED : -BALL_SPEED)
+                ball.setVelocityY(ball.y < char.y ? BALL_SPEED : -BALL_SPEED)
             }
+
+            for (ball of cleanup) {
+                balls.delete(ball)
+                ball.destroy()
+            }
+        }
+
+        function knifeHitsBall(ball, knife) {
+            cleanup.add(ball)
+            score += 1
+            scoreText.setText("SCORE: " + score)
         }
     </script>
 
