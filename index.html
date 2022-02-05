@@ -50,6 +50,7 @@
             this.load.image('chowder', 'assets/henry.png');
             this.load.image('kelley', 'assets/kelley.png');
             this.load.image('roffles', 'assets/roffles.png');
+            this.load.image('thumb', 'assets/thumbs_down.png');
         }
 
         function create() {
@@ -120,7 +121,9 @@
             }
 
             if (gameState == GameState.DONE) {
-                deadTeaxt = this.add.text(100, 100, 'U DIED NYUM....', { fontSize: '32px', fill: '#FFF' });
+                deadTeaxt = this.add.text(100, 100, 'U DIED BRO. HAPPENS.', { fontSize: '32px', fill: '#FFF' });
+                thumb = this.physics.add.image(500, 500, 'thumb')
+                thumb.setScale(5)
                 reset()
                 return
             }
