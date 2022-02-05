@@ -46,7 +46,7 @@
         gameState = GameState.SETUP;
 
         function preload() {
-            this.load.image('knife', 'assets/knife.png');
+            this.load.image('knife', 'assets/ball.png');
             this.load.image('chowder', 'assets/chowder.png');
             this.load.image('fire', 'assets/kelley.png');
         }
@@ -65,7 +65,7 @@
                 delay: 300,
                 callback: function () {
                     knife = this.physics.add.image(char.x, char.y, 'knife')
-                    knife.setScale(.1)
+                    knife.setScale(.05)
                     knife.setVelocityX(knifeSpeedX)
                     knife.setVelocityY(knifeSpeedY)
 
@@ -85,7 +85,7 @@
 
             // Setup fireballs
             this.time.addEvent({
-                delay: 1000,
+                delay: 600,
                 callback: function () {
                     dist = 200
                     spawnX = char.x + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
@@ -147,6 +147,11 @@
             for (ball of balls) {
                 ball.setVelocityX(ball.x < char.x ? BALL_SPEED : -BALL_SPEED)
                 ball.setVelocityY(ball.y < char.y ? BALL_SPEED : -BALL_SPEED)
+                ball.angle += 10;
+            }
+
+            for (k of knives) {
+                k.angle += 20;
             }
 
             for (ball of cleanup) {
