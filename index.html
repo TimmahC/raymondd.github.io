@@ -48,7 +48,8 @@
         function preload() {
             this.load.image('knife', 'assets/ball.png');
             this.load.image('chowder', 'assets/chowder.png');
-            this.load.image('fire', 'assets/kelley.png');
+            this.load.image('kelley', 'assets/kelley.png');
+            this.load.image('roffles', 'assets/roffles.png');
         }
 
         function create() {
@@ -90,8 +91,11 @@
                     dist = 200
                     spawnX = char.x + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
                     spawnY = char.y + ((dist + (Math.random() * dist)) * (Math.random() < 0.5 ? -1 : 1))
-                    ball = this.physics.add.image(spawnX, spawnY, 'fire')
-                    ball.setScale(.5)
+
+                    isKelley = Math.random() < 0.5
+
+                    ball = this.physics.add.image(spawnX, spawnY, isKelley ? 'kelley' : 'roffles')
+                    ball.setScale(isKelley ? .5 : .8)
 
                     balls.add(ball)
 
@@ -147,7 +151,7 @@
             for (ball of balls) {
                 ball.setVelocityX(ball.x < char.x ? BALL_SPEED : -BALL_SPEED)
                 ball.setVelocityY(ball.y < char.y ? BALL_SPEED : -BALL_SPEED)
-                ball.angle += 10;
+                ball.angle += 5;
             }
 
             for (k of knives) {
